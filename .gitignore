@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# Capacitor native dirs (added when wrapping for mobile)
+ios
+android
+
+# IDE
+.vscode
+.idea
+
+# Environment
+.env
+.env.*
