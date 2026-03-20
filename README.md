@@ -35,9 +35,26 @@ Production build deploys automatically on every push to `main` (see [`.github/wo
 
 **Live URL:** [https://shoshin-labs.github.io/phil-game/](https://shoshin-labs.github.io/phil-game/)
 
-**One-time setup (repo admin):** GitHub → **Settings** → **Pages** → **Build and deployment** → source **GitHub Actions**. After the first workflow run finishes, the site should be available within a minute or two.
+**One-time setup (repo admin)** — pick one:
 
-> **Private repos:** GitHub Pages for private repositories may require a paid GitHub plan depending on your org settings. If the workflow succeeds but the site doesn’t load, check Pages availability for your account or make the repo public.
+- **GitHub CLI** (same effect as the UI: workflow-based Pages):
+
+  ```bash
+  gh api repos/shoshin-labs/phil-game/pages -X POST --input - <<'EOF'
+  {
+    "build_type": "workflow",
+    "source": { "branch": "main", "path": "/" }
+  }
+  EOF
+  ```
+
+  Or run **`./scripts/enable-github-pages.sh`** from this repo (requires [`gh`](https://cli.github.com/) and admin on the repo).
+
+- **Web UI:** **Settings** → **Pages** → **Build and deployment** → source **GitHub Actions**.
+
+After Pages is enabled, a successful run of [Deploy to GitHub Pages](.github/workflows/deploy-pages.yml) publishes the site (usually within a minute).
+
+> **Private repos on Free:** GitHub may return *“Your current plan does not support GitHub Pages for this repository.”* In that case make the repo **public**, upgrade the org/account, or host the `dist` output elsewhere (e.g. Cloudflare Pages / Netlify).
 
 ## Repo
 
