@@ -1,5 +1,8 @@
 {
   "name": "phil-game",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "dev": "pnpm --filter @phil-game/philosophy dev",
+    "build": "pnpm --filter @phil-game/philosophy build"
+  }
 }

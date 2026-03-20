@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@phil-game/shared": "workspace:*",
     "phaser": "^3.90.0"
   },
   "devDependencies": {

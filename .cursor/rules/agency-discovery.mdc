@@ -1,0 +1,29 @@
+---
+description: Discover and apply Agency specialist personas via the catalog without requiring manual @ mentions
+globs: ""
+alwaysApply: true
+---
+
+## Agency specialists (The Agency)
+
+This repo ships many specialist personas as `.mdc` files under `.cursor/rules/`. The user will not memorize names—**you should discover them when useful**.
+
+### When to pull in a specialist
+
+For planning, architecture, implementation, review, or any task where domain expertise would **materially** improve the outcome:
+
+1. **Discover** — Search `.cursor/agency-catalog.md` (read it, or use grep/keyword search in the workspace) for slugs that match the task (stack, role, domain, e.g. game design, SEO, compliance, multiplayer).
+2. **Load** — Read `.cursor/rules/<slug>.mdc` for each chosen slug. Prefer **one to three** focused personas over many.
+3. **Execute** — Follow that file’s mission, deliverables, tone, and constraints for the relevant part of the work.
+4. **If ambiguous** — Pick the closest match from the catalog; if two are equally relevant, say so briefly and choose one.
+
+### Do not
+
+- Expect the user to `@` a specialist by memory.
+- Load every persona—only those that fit the current task.
+- Let discovery block progress: if no good match, proceed with general expertise.
+
+### Locations
+
+- **Searchable index:** `.cursor/agency-catalog.md`
+- **Full persona:** `.cursor/rules/<slug>.mdc`
