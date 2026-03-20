@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "typeRoots": ["./node_modules/phaser/types"],
-    "types": ["Phaser"]
+    "outDir": "./dist"
   },
   "include": ["src"]
 }
