@@ -54,8 +54,6 @@ Production build deploys automatically on every push to `main` (see [`.github/wo
 
 After Pages is enabled, a successful run of [Deploy to GitHub Pages](.github/workflows/deploy-pages.yml) publishes the site (usually within a minute).
 
-> **Private repos on Free:** GitHub may return *“Your current plan does not support GitHub Pages for this repository.”* In that case make the repo **public**, upgrade the org/account, or host the `dist` output elsewhere (e.g. Cloudflare Pages / Netlify).
-
 ## Repo
 
-Remote: `https://github.com/shoshin-labs/phil-game` (private, `main`).
+Remote: [`shoshin-labs/phil-game`](https://github.com/shoshin-labs/phil-game) — **public**, default branch `main`. GitHub Pages is enabled with **GitHub Actions** as the publishing source.
