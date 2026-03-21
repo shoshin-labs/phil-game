@@ -74,7 +74,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.3.0 — aim parallax · impacts · sonar ripples · ground stripes", {
+      .text(width / 2, height - 28, "Release 0.4.0 — rich tracer · scorch marks · terrain grain", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",

@@ -4,6 +4,10 @@ All notable changes to this monorepo are summarized here. Fog of War and The Atr
 
 ## Fog of War
 
+### 0.4.0 — 2026-03-21
+
+**2.5D pass:** **Rich aim arc** — layered glow + beads along the trajectory preview. **Scorch marks** persist per cell for the battle (darker / double ring on repeat hits; client-only, cleared on new game). **Terrain grain** — boot-generated noise texture, tiled over the arena with multiply blend, moves with aim parallax.
+
 ### 0.3.0 — 2026-03-21
 
 **More 2.5D juice:** backdrop layers shift subtly with **aim** (standard mode); **shell impact** sparks + shock rings by hit type (unit / terrain / miss / out); **sonar** concentric ripples at the ping cell; **terrain stripe** overlay on the grid (placement + battle). Handoff to the next player is delayed briefly so VFX can play.

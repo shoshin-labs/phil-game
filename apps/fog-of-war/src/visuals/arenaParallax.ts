@@ -18,6 +18,8 @@ export interface ArenaParallaxHandles {
   sky: Phaser.GameObjects.Graphics;
   hills: Phaser.GameObjects.Graphics;
   slab: Phaser.GameObjects.Graphics;
+  /** Tiled noise over the grid; null if `fow_grain` texture missing. */
+  grain: Phaser.GameObjects.TileSprite | null;
 }
 
 /**
@@ -77,7 +79,21 @@ export function addArenaParallax(scene: Scene): ArenaParallaxHandles {
   slab.lineStyle(1, 0x2a3848, 0.45);
   slab.strokeRect(sx + 0.5, sy + 0.5, sw - 1, sh - 1);
 
-  return { sky, hills, slab };
+  let grain: Phaser.GameObjects.TileSprite | null = null;
+  if (scene.textures.exists("fow_grain")) {
+    grain = scene.add.tileSprite(
+      GRID_OFFSET_X,
+      GRID_OFFSET_Y,
+      GRID_PX_W,
+      GRID_PX_H,
+      "fow_grain",
+    );
+    grain.setDepth(-35);
+    grain.setAlpha(0.07);
+    grain.setBlendMode(Phaser.BlendModes.MULTIPLY);
+  }
+
+  return { sky, hills, slab, grain };
 }
 
 /** Aim-driven micro-shift: hills move more than sky (classic parallax). */
@@ -96,12 +112,18 @@ export function updateAimParallax(
   h.sky.setPosition(ox * 0.22, oy * 0.18);
   h.hills.setPosition(ox * 0.72, oy * 0.45);
   h.slab.setPosition(ox * 0.12, oy * 0.08);
+  if (h.grain) {
+    h.grain.setPosition(GRID_OFFSET_X + ox * 0.12, GRID_OFFSET_Y + oy * 0.08);
+  }
 }
 
 export function resetAimParallax(h: ArenaParallaxHandles): void {
   h.sky.setPosition(0, 0);
   h.hills.setPosition(0, 0);
   h.slab.setPosition(0, 0);
+  if (h.grain) {
+    h.grain.setPosition(GRID_OFFSET_X, GRID_OFFSET_Y);
+  }
 }
 
 /** Menu / title: lighter horizon band without the arena slab. */

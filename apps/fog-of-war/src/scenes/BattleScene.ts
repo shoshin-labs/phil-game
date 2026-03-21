@@ -29,6 +29,8 @@ import {
 import {
   getFowState,
   getLastSonarLine,
+  getShellCraterCounts,
+  recordShellCrater,
   setFowState,
   setLastSonarLine,
 } from "../game/session";
@@ -38,7 +40,9 @@ import {
   updateAimParallax,
   type ArenaParallaxHandles,
 } from "../visuals/arenaParallax";
+import { craterKeyFromHit, drawCraterMarks } from "../visuals/craters";
 import { spawnShellImpactFromHit, spawnSonarRipple } from "../visuals/combatFx";
+import { drawRichTrajectoryPreview } from "../visuals/trajectoryPreview";
 import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
@@ -67,6 +71,7 @@ export class BattleScene extends Phaser.Scene {
   private hudErrorTimer?: Phaser.Time.TimerEvent;
   private parallaxHandles?: ArenaParallaxHandles;
   private terrainStripesGfx?: Phaser.GameObjects.Graphics;
+  private craterMarksGfx?: Phaser.GameObjects.Graphics;
   private transitionTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
@@ -522,6 +527,14 @@ export class BattleScene extends Phaser.Scene {
       }
     }
 
+    this.craterMarksGfx?.destroy();
+    this.craterMarksGfx = drawCraterMarks(
+      this,
+      s.gridW,
+      s.gridH,
+      getShellCraterCounts(),
+    );
+
     for (const t of this.unitLabels) t.destroy();
     this.unitLabels = [];
 
@@ -573,16 +586,12 @@ export class BattleScene extends Phaser.Scene {
     );
     if (pts.length < 2) return;
 
-    const gfx = this.add.graphics();
-    this.previewGraphics = gfx;
-    gfx.setDepth(8);
-    gfx.lineStyle(2, 0x7a9cff, 0.55);
-    gfx.beginPath();
-    gfx.moveTo(pts[0]!.x + GRID_OFFSET_X, pts[0]!.y + GRID_OFFSET_Y);
-    for (let i = 1; i < pts.length; i++) {
-      gfx.lineTo(pts[i]!.x + GRID_OFFSET_X, pts[i]!.y + GRID_OFFSET_Y);
-    }
-    gfx.strokePath();
+    this.previewGraphics = drawRichTrajectoryPreview(
+      this,
+      pts,
+      GRID_OFFSET_X,
+      GRID_OFFSET_Y,
+    );
   }
 
   private drawHover() {
@@ -633,6 +642,9 @@ export class BattleScene extends Phaser.Scene {
       this.showHudError(r.error);
       return;
     }
+
+    const craterKey = craterKeyFromHit(hit, s.gridW, s.gridH);
+    if (craterKey) recordShellCrater(craterKey);
 
     this.applyFireState(r.state);
     playShoot(this);
