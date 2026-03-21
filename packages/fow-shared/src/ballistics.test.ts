@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_GRID_H, DEFAULT_GRID_W } from "./constants";
-import { launchOriginForPlayer, simulateShot } from "./ballistics";
+import {
+  launchOriginForPlayer,
+  sampleShotTrajectory,
+  simulateShot,
+} from "./ballistics";
 import type { AimInput } from "./types";
 
 describe("ballistics", () => {
@@ -23,5 +27,20 @@ describe("ballistics", () => {
     if (hit.cell) {
       expect(hit.cell.col).toBeGreaterThanOrEqual(8);
     }
+  });
+
+  it("sampleShotTrajectory returns a polyline for preview", () => {
+    const origin = launchOriginForPlayer("A", DEFAULT_GRID_W, DEFAULT_GRID_H);
+    const aim: AimInput = { angleRad: -0.45, power: 0.85 };
+    const pts = sampleShotTrajectory(
+      origin,
+      aim,
+      DEFAULT_GRID_W,
+      DEFAULT_GRID_H,
+      blocked,
+      [],
+      4,
+    );
+    expect(pts.length).toBeGreaterThanOrEqual(2);
   });
 });

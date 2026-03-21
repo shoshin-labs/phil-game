@@ -1,6 +1,8 @@
 /**
  * Default tuning — all [PLACEHOLDER] until playtest (see docs/FOW-GDD.md §11).
  */
+import type { UnitKind } from "./types";
+
 export const DEFAULT_GRID_W = 16;
 export const DEFAULT_GRID_H = 12;
 
@@ -29,3 +31,10 @@ export const TRAJECTORY_MAX_STEPS = 8000;
 
 export const DEFAULT_AMMO_STANDARD = 12;
 export const DEFAULT_AMMO_SONAR = 2;
+
+/** v1 placement: how many of each kind each player must place (0 = unused). */
+export const PLACEMENT_QUOTA: Record<UnitKind, number> = {
+  cannon: 2,
+  bunker: 1,
+  decoy: 0,
+};

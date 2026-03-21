@@ -1,6 +1,11 @@
 import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
+import { BattleScene } from "./scenes/BattleScene";
+import { HandoffScene } from "./scenes/HandoffScene";
+import { HowToPlayScene } from "./scenes/HowToPlayScene";
 import { MenuScene } from "./scenes/MenuScene";
+import { PlacementScene } from "./scenes/PlacementScene";
+import { ResultScene } from "./scenes/ResultScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -14,7 +19,15 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1280,
     height: 720,
   },
-  scene: [BootScene, MenuScene],
+  scene: [
+    BootScene,
+    MenuScene,
+    HowToPlayScene,
+    HandoffScene,
+    PlacementScene,
+    BattleScene,
+    ResultScene,
+  ],
 };
 
 new Phaser.Game(config);

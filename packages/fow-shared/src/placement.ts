@@ -1,4 +1,4 @@
-import { splitColumn } from "./constants";
+import { PLACEMENT_QUOTA, splitColumn } from "./constants";
 import type { CellCoord, GameState, PlayerId, Unit, UnitKind } from "./types";
 import { cellKey, inBounds, playerOwnsColumn } from "./grid";
 
@@ -35,6 +35,20 @@ export function canPlaceUnit(
   anchor: CellCoord,
   horizontal2x1: boolean,
 ): { ok: true; cells: CellCoord[] } | { ok: false; reason: string } {
+  if (PLACEMENT_QUOTA[kind] <= 0) {
+    return { ok: false, reason: "This unit is not in the current roster" };
+  }
+  const cap = PLACEMENT_QUOTA[kind];
+  const already = state.units.filter(
+    (u) => u.owner === owner && u.kind === kind,
+  ).length;
+  if (cap > 0 && already >= cap) {
+    const name = kind === "cannon" ? "cannons" : kind === "bunker" ? "bunkers" : `${kind}s`;
+    return {
+      ok: false,
+      reason: `Roster full — you can only place ${cap} ${name}`,
+    };
+  }
   const cells = footprint(kind, anchor, horizontal2x1);
   for (const c of cells) {
     if (!inBounds(c, state.gridW, state.gridH)) {
@@ -105,4 +119,23 @@ export function opponentHalfColumns(
   const s = splitColumn(gridW);
   if (player === "A") return { from: 0, to: s - 1 };
   return { from: s, to: gridW - 1 };
+}
+
+export function countUnitsOfKind(
+  state: GameState,
+  player: PlayerId,
+  kind: UnitKind,
+): number {
+  return state.units.filter((u) => u.owner === player && u.kind === kind)
+    .length;
+}
+
+export function quotaMet(state: GameState, player: PlayerId): boolean {
+  const kinds: UnitKind[] = ["cannon", "bunker", "decoy"];
+  for (const kind of kinds) {
+    const need = PLACEMENT_QUOTA[kind];
+    if (need <= 0) continue;
+    if (countUnitsOfKind(state, player, kind) < need) return false;
+  }
+  return true;
 }

@@ -40,6 +40,49 @@ export function simulateShot(
   blocked: boolean[][],
   units: Unit[],
 ): TrajectoryHit {
+  return runTrajectory(origin, aim, gridW, gridH, blocked, units, null).hit;
+}
+
+/**
+ * World-space samples along the path (for preview). Uses the same physics as `simulateShot`.
+ * `sampleStride` = emit a point every N simulation steps (plus one at impact).
+ */
+export function sampleShotTrajectory(
+  origin: Vec2,
+  aim: AimInput,
+  gridW: number,
+  gridH: number,
+  blocked: boolean[][],
+  units: Unit[],
+  sampleStride = 4,
+): Vec2[] {
+  return runTrajectory(
+    origin,
+    aim,
+    gridW,
+    gridH,
+    blocked,
+    units,
+    sampleStride,
+  ).samples;
+}
+
+function runTrajectory(
+  origin: Vec2,
+  aim: AimInput,
+  gridW: number,
+  gridH: number,
+  blocked: boolean[][],
+  units: Unit[],
+  sampleStride: number | null,
+): { hit: TrajectoryHit; samples: Vec2[] } {
+  const samples: Vec2[] = [];
+  const pushSample = (x: number, y: number) => {
+    if (sampleStride !== null) {
+      samples.push({ x, y });
+    }
+  };
+
   const power = Math.min(1, Math.max(0, aim.power));
   const speed = DEFAULT_MAX_SPEED * power;
   const vx = Math.cos(aim.angleRad) * speed;
@@ -58,47 +101,71 @@ export function simulateShot(
     y += vyCur * TRAJECTORY_DT;
     vyCur += DEFAULT_GRAVITY * TRAJECTORY_DT;
 
+    if (sampleStride !== null && (i % sampleStride === 0 || i === 0)) {
+      pushSample(x, y);
+    }
+
     if (x < 0 || y < 0 || x >= worldW || y >= worldH) {
-      return {
+      const hit: TrajectoryHit = {
         kind: "out_of_bounds",
         cell: null,
         impactWorld: { x, y },
       };
+      if (sampleStride !== null) {
+        pushSample(x, y);
+      }
+      return { hit, samples };
     }
 
     const cell = worldToCell({ x, y });
     if (!inBounds(cell, gridW, gridH)) {
-      return {
+      const hit: TrajectoryHit = {
         kind: "out_of_bounds",
         cell: null,
         impactWorld: { x, y },
       };
+      if (sampleStride !== null) {
+        pushSample(x, y);
+      }
+      return { hit, samples };
     }
 
     if (blocked[cell.row]![cell.col]!) {
-      return {
+      const hit: TrajectoryHit = {
         kind: "terrain",
         cell,
         impactWorld: { x, y },
       };
+      if (sampleStride !== null) {
+        pushSample(x, y);
+      }
+      return { hit, samples };
     }
 
-    const hit = unitAtCell(units, cell);
-    if (hit) {
-      return {
+    const u = unitAtCell(units, cell);
+    if (u) {
+      const hit: TrajectoryHit = {
         kind: "unit",
         cell,
-        unitId: hit.id,
+        unitId: u.id,
         impactWorld: { x, y },
       };
+      if (sampleStride !== null) {
+        pushSample(x, y);
+      }
+      return { hit, samples };
     }
   }
 
-  return {
+  const hit: TrajectoryHit = {
     kind: "miss",
     cell: null,
     impactWorld: { x, y },
   };
+  if (sampleStride !== null) {
+    pushSample(x, y);
+  }
+  return { hit, samples };
 }
 
 /** Baseline launch point: middle of back edge column for the shooter. */

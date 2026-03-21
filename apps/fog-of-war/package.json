@@ -1,6 +1,6 @@
 {
   "name": "@phil-game/fog-of-war",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {

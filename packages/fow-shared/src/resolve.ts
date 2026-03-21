@@ -59,7 +59,8 @@ function bunkerAlive(units: Unit[], owner: PlayerId): boolean {
   );
 }
 
-function evaluateEnd(state: GameState): GameState {
+/** Exported for tests and tooling that need win detection without firing. */
+export function evaluateEnd(state: GameState): GameState {
   const aAlive = bunkerAlive(state.units, "A");
   const bAlive = bunkerAlive(state.units, "B");
   if (!aAlive && !bAlive) {

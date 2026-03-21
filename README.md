@@ -3,18 +3,20 @@
 Monorepo for games by **Shoshin Labs**. Currently houses two projects:
 
 - **The Atrium** — a short philosophy game about *how you move through ideas* (branching choices, hidden axes, reflective finale). Design: [`docs/GDD.md`](docs/GDD.md).
-- **Fog of War** *(in development)* — turn-based, physics-driven strategy with hidden information. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md). Build notes: [`docs/FOW-BUILD.md`](docs/FOW-BUILD.md).
+- **Fog of War** — **v0.1.0** — 2D hot-seat prototype; roadmap for 3D / 2.5D next: [`docs/FOW-ROADMAP.md`](docs/FOW-ROADMAP.md). Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md). Build: [`docs/FOW-BUILD.md`](docs/FOW-BUILD.md). Changelog: [`docs/CHANGELOG.md`](CHANGELOG.md).
 
 ## Games
 
 - **`apps/philosophy`** — **The Atrium** — Phaser 3 philosophy game; narrative data in `@phil-game/shared`. Design: [`docs/GDD.md`](docs/GDD.md).
-- **`apps/fog-of-war`** — **Fog of War** — Phaser client; rules in `@phil-game/fow-shared`. `pnpm dev:fow` to run.
+- **`apps/fog-of-war`** — **Fog of War** — Phaser client; rules in `@phil-game/fow-shared`. Default: `pnpm dev` / `pnpm build`.
 
 ## Setup
 
 ```bash
 pnpm install
 ```
+
+**Tests (Fog of War rules engine):** `pnpm test`
 
 ## Development
 
@@ -24,20 +26,22 @@ From the repo root:
 pnpm dev
 ```
 
-**Fog of War:**
+**The Atrium:**
 
 ```bash
-pnpm dev:fow
+pnpm dev:atrium
 ```
 
 Or from an app folder:
 
 ```bash
-cd apps/philosophy && pnpm dev
 cd apps/fog-of-war && pnpm dev
+cd apps/philosophy && pnpm dev
 ```
 
 Then open the URL Vite prints (usually `http://localhost:5173`).
+
+**Production builds:** `pnpm build` (Fog of War) · `pnpm build:atrium` (The Atrium).
 
 ## Play on GitHub Pages
 

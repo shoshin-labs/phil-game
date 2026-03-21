@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig(({ command }) => ({
-  base: command === "build" ? "/fog-of-war/" : "/",
+  base: command === "build" ? "/phil-game/" : "/",
   build: {
     outDir: "dist",
   },

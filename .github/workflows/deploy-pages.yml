@@ -30,11 +30,11 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @phil-game/philosophy build
+      - run: pnpm --filter @phil-game/fog-of-war build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/philosophy/dist
+          path: apps/fog-of-war/dist
 
   deploy:
     runs-on: ubuntu-latest

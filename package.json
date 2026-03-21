@@ -2,10 +2,11 @@
   "name": "phil-game",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @phil-game/philosophy dev",
-    "dev:fow": "pnpm --filter @phil-game/fog-of-war dev",
-    "build": "pnpm --filter @phil-game/philosophy build",
-    "build:fow": "pnpm --filter @phil-game/fog-of-war build",
+    "dev": "pnpm --filter @phil-game/fog-of-war dev",
+    "dev:atrium": "pnpm --filter @phil-game/philosophy dev",
+    "build": "pnpm --filter @phil-game/fog-of-war build",
+    "build:atrium": "pnpm --filter @phil-game/philosophy build",
+    "test": "pnpm --filter @phil-game/fow-shared test",
     "test:fow": "pnpm --filter @phil-game/fow-shared test"
   }
 }
