@@ -18,6 +18,7 @@ import {
   type FogMap,
   type GameState,
   type Unit,
+  type Vec2,
 } from "@phil-game/fow-shared";
 import { playGameEnd, playShoot, playSonar } from "../audio/sfx";
 import { FONT_UI, FONT_MONO } from "../config/fonts";
@@ -29,7 +30,7 @@ import {
 import {
   getFowState,
   getLastSonarLine,
-  getShellCraterCounts,
+  getShellCraterRecords,
   recordShellCrater,
   setFowState,
   setLastSonarLine,
@@ -42,7 +43,11 @@ import {
 } from "../visuals/arenaParallax";
 import { craterKeyFromHit, drawCraterMarks } from "../visuals/craters";
 import { spawnShellImpactFromHit, spawnSonarRipple } from "../visuals/combatFx";
-import { drawRichTrajectoryPreview } from "../visuals/trajectoryPreview";
+import { drawCraterRubble } from "../visuals/rubble";
+import {
+  drawRichTrajectoryPreview,
+  pointOnPolyline,
+} from "../visuals/trajectoryPreview";
 import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
@@ -72,6 +77,11 @@ export class BattleScene extends Phaser.Scene {
   private parallaxHandles?: ArenaParallaxHandles;
   private terrainStripesGfx?: Phaser.GameObjects.Graphics;
   private craterMarksGfx?: Phaser.GameObjects.Graphics;
+  private rubbleGfx?: Phaser.GameObjects.Graphics;
+  private trajectoryPtsWorld: Vec2[] = [];
+  private cometContainer?: Phaser.GameObjects.Container;
+  private cometProgress = 0;
+  private readonly cometSpeed = 0.52;
   private transitionTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
@@ -248,12 +258,44 @@ export class BattleScene extends Phaser.Scene {
       this.keyBindings = [];
       this.hudErrorTimer?.remove();
       this.transitionTimer?.remove();
+      this.destroyCometHead();
     });
 
     this.refreshHud();
     this.syncAimParallax();
     this.redrawBattlefield();
     this.maybeShowBattleHint();
+  }
+
+  update(_time: number, delta: number) {
+    if (
+      this.mode !== "standard" ||
+      this.trajectoryPtsWorld.length < 2 ||
+      !this.cometContainer
+    ) {
+      return;
+    }
+    this.cometProgress += (delta / 1000) * this.cometSpeed;
+    while (this.cometProgress > 1) this.cometProgress -= 1;
+    const p = pointOnPolyline(this.trajectoryPtsWorld, this.cometProgress);
+    this.cometContainer.setPosition(
+      p.x + GRID_OFFSET_X,
+      p.y + GRID_OFFSET_Y,
+    );
+  }
+
+  private destroyCometHead() {
+    this.cometContainer?.destroy();
+    this.cometContainer = undefined;
+  }
+
+  private setupCometHead() {
+    this.destroyCometHead();
+    const glow = this.add.circle(0, 0, 12, 0xa8c8ff, 0.32);
+    const core = this.add.circle(0, 0, 5, 0xecf4ff, 0.95);
+    const spark = this.add.circle(3, -2, 2, 0xffffff, 0.85);
+    this.cometContainer = this.add.container(0, 0, [glow, core, spark]);
+    this.cometContainer.setDepth(11);
   }
 
   private syncAimParallax() {
@@ -532,7 +574,15 @@ export class BattleScene extends Phaser.Scene {
       this,
       s.gridW,
       s.gridH,
-      getShellCraterCounts(),
+      getShellCraterRecords(),
+    );
+
+    this.rubbleGfx?.destroy();
+    this.rubbleGfx = drawCraterRubble(
+      this,
+      s.gridW,
+      s.gridH,
+      getShellCraterRecords(),
     );
 
     for (const t of this.unitLabels) t.destroy();
@@ -570,6 +620,8 @@ export class BattleScene extends Phaser.Scene {
 
   private drawTrajectoryPreview() {
     this.previewGraphics?.destroy();
+    this.destroyCometHead();
+    this.trajectoryPtsWorld = [];
     if (this.mode !== "standard") return;
 
     const s = getFowState();
@@ -586,12 +638,15 @@ export class BattleScene extends Phaser.Scene {
     );
     if (pts.length < 2) return;
 
+    this.trajectoryPtsWorld = pts;
     this.previewGraphics = drawRichTrajectoryPreview(
       this,
       pts,
       GRID_OFFSET_X,
       GRID_OFFSET_Y,
     );
+    this.setupCometHead();
+    this.cometProgress = 0;
   }
 
   private drawHover() {
@@ -644,7 +699,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     const craterKey = craterKeyFromHit(hit, s.gridW, s.gridH);
-    if (craterKey) recordShellCrater(craterKey);
+    if (craterKey) recordShellCrater(craterKey, hit.kind);
 
     this.applyFireState(r.state);
     playShoot(this);

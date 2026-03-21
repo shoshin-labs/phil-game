@@ -1,6 +1,6 @@
 # Fog of War — build & run
 
-**Release:** **0.4.0** (`@phil-game/fog-of-war` / `@phil-game/fow-shared`). Next steps (more 2.5D / 3D): [`FOW-ROADMAP.md`](FOW-ROADMAP.md).
+**Release:** **0.5.0** (`@phil-game/fog-of-war` / `@phil-game/fow-shared`). Optional **3D** client or further juice: [`FOW-ROADMAP.md`](FOW-ROADMAP.md).
 
 ## Packages
 

@@ -3,7 +3,7 @@
 Monorepo for games by **Shoshin Labs**. Currently houses two projects:
 
 - **The Atrium** — a short philosophy game about *how you move through ideas* (branching choices, hidden axes, reflective finale). Design: [`docs/GDD.md`](docs/GDD.md).
-- **Fog of War** — **v0.4.0** — hot-seat prototype with 2.5D visuals, combat FX, and battle scorch marks; roadmap for deeper spatial / 3D next: [`docs/FOW-ROADMAP.md`](docs/FOW-ROADMAP.md). Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md). Build: [`docs/FOW-BUILD.md`](docs/FOW-BUILD.md). Changelog: [`docs/CHANGELOG.md`](CHANGELOG.md).
+- **Fog of War** — **v0.5.0** — hot-seat prototype with full **2.5D** polish (parallax, FX, craters, comet tracer, rubble). Optional **3D client** track remains future work: [`docs/FOW-ROADMAP.md`](docs/FOW-ROADMAP.md). Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md). Build: [`docs/FOW-BUILD.md`](docs/FOW-BUILD.md). Changelog: [`docs/CHANGELOG.md`](CHANGELOG.md).
 
 ## Games
 

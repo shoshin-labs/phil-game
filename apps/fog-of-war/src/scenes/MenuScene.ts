@@ -74,7 +74,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.4.0 — rich tracer · scorch marks · terrain grain", {
+      .text(width / 2, height - 28, "Release 0.5.0 — comet tracer · kind-aware craters · rubble", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",

@@ -4,6 +4,10 @@ All notable changes to this monorepo are summarized here. Fog of War and The Atr
 
 ## Fog of War
 
+### 0.5.0 — 2026-03-21
+
+**2.5D “next pass” (Phaser grid client):** **Animated comet** — bright head loops along the aim arc (`pointOnPolyline` + `update`). **Hit-kind crater palettes** — scorch fill/stroke/ring colours follow `TrajectoryHit.kind` (unit / terrain / miss / out-of-bounds); session stores `{ count, lastKind }` per cell. **Rubble shards** — deterministic triangles around each crater, denser on repeat hits. Cleared with `resetFowSession()` like other client-only battle marks.
+
 ### 0.4.0 — 2026-03-21
 
 **2.5D pass:** **Rich aim arc** — layered glow + beads along the trajectory preview. **Scorch marks** persist per cell for the battle (darker / double ring on repeat hits; client-only, cleared on new game). **Terrain grain** — boot-generated noise texture, tiled over the arena with multiply blend, moves with aim parallax.
