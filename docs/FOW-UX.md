@@ -5,6 +5,11 @@
 - **2D grid + ballistics**, not a 3D shooter or tile-picker. You **aim** with angle and power; the simulation finds the **first** cell struck along the arc.
 - Expectations are set on the **menu** and **battle** header so players are not looking for a 3D camera or direct “click a square to land” control.
 
+## Units and firing
+
+- **Icons** — Cannons, bunkers, and (if enabled) decoys use small generated sprites on each tile; HP text sits under the icon.
+- **Where shells come from** — Simulation uses the **first surviving cannon** (deterministic row/col order); if no cannon is left, launch falls back to the old **map-edge** point. The HUD shows **“Shell fires from cannon tile row R, col C”**.
+
 ## Landing / targeting
 
 - **Orange preview** — outlines the **first grid tile** the shell will hit (same simulation as the actual shot).

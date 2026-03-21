@@ -1,6 +1,10 @@
 # Fog of War — roadmap
 
-## 0.5.1 (current)
+## 0.6.0 (current)
+
+- **Units** — **Icons** for cannon / bunker / decoy; **shells** launch from **cannon tiles** (see `launchOriginForPlayer` + `FOW-UX.md`).
+
+## 0.5.1
 
 - **UX** — grid **impact preview** (orange first-hit + blast ring), **HUD** row/col + hit label, **left key legend**, **2D vs not-3D** copy, **canvas focus**, updated **How to play** + first-run overlay. See [`FOW-UX.md`](FOW-UX.md).
 

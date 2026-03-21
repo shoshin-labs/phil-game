@@ -16,6 +16,7 @@ import {
   playerOwnsColumn,
   sampleShotTrajectory,
   simulateShot,
+  worldToCell,
   type FogMap,
   type GameState,
   type Unit,
@@ -49,6 +50,7 @@ import {
   drawRichTrajectoryPreview,
   pointOnPolyline,
 } from "../visuals/trajectoryPreview";
+import { textureKeyForUnitKind } from "../visuals/unitSprites";
 import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { labelHitKind } from "../ui/battleHints";
@@ -66,6 +68,7 @@ export class BattleScene extends Phaser.Scene {
   private impactPreviewGraphics?: Phaser.GameObjects.Graphics;
   private hoverGraphics?: Phaser.GameObjects.Graphics;
   private unitLabels: Phaser.GameObjects.Text[] = [];
+  private unitIcons: Phaser.GameObjects.GameObject[] = [];
   private hud?: Phaser.GameObjects.Text;
   private modeStripe?: Phaser.GameObjects.Rectangle;
   private mode: FireMode = "standard";
@@ -543,6 +546,11 @@ export class BattleScene extends Phaser.Scene {
     if (last) parts.push(last, "");
 
     if (this.mode === "standard") {
+      const origin = launchOriginForPlayer(p, s.units, s.gridW, s.gridH);
+      const lc = worldToCell(origin);
+      parts.push(`Shell fires from cannon tile row ${lc.row}, col ${lc.col}`);
+      parts.push("");
+
       const pred = this.computeAimPrediction();
       if (pred) {
         if (pred.cell && inBounds(pred.cell, s.gridW, s.gridH)) {
@@ -579,7 +587,7 @@ export class BattleScene extends Phaser.Scene {
     const s = getFowState();
     if (s.phase !== "battle") return null;
     const p = s.activePlayer;
-    const origin = launchOriginForPlayer(p, s.gridW, s.gridH);
+    const origin = launchOriginForPlayer(p, s.units, s.gridW, s.gridH);
     const opponentUnits = s.units.filter((u) => u.owner === opponentOf(p));
     return simulateShot(
       origin,
@@ -698,6 +706,8 @@ export class BattleScene extends Phaser.Scene {
 
     for (const t of this.unitLabels) t.destroy();
     this.unitLabels = [];
+    for (const im of this.unitIcons) im.destroy();
+    this.unitIcons = [];
 
     for (const u of s.units) {
       const show =
@@ -709,12 +719,20 @@ export class BattleScene extends Phaser.Scene {
           const fc = fog[cellKey(c)];
           if (!fc || fc.unitId !== u.id) return;
         }
+        const cx = GRID_OFFSET_X + c.col * CELL_PX + CELL_PX / 2;
+        const cy = GRID_OFFSET_Y + c.row * CELL_PX + 11;
+        const icon = this.add.image(cx, cy, textureKeyForUnitKind(u.kind));
+        icon.setDisplaySize(22, 22);
+        icon.setDepth(6);
+        icon.setAlpha(ally ? 1 : 0.92);
+        this.unitIcons.push(icon);
+
         const px = GRID_OFFSET_X + c.col * CELL_PX + 2;
-        const py = GRID_OFFSET_Y + c.row * CELL_PX + 2;
+        const py = GRID_OFFSET_Y + c.row * CELL_PX + 20;
         const label = this.add
           .text(px, py, unitCellCaption(u, idx), {
             fontFamily: FONT_UI,
-            fontSize: "9px",
+            fontSize: "8px",
             color: ally ? "#e8ecf4" : "#d4b898",
             lineSpacing: 1,
             wordWrap: { width: CELL_PX - 4 },
@@ -738,7 +756,7 @@ export class BattleScene extends Phaser.Scene {
 
     const s = getFowState();
     const p = s.activePlayer;
-    const origin = launchOriginForPlayer(p, s.gridW, s.gridH);
+    const origin = launchOriginForPlayer(p, s.units, s.gridW, s.gridH);
     const opponentUnits = s.units.filter((u) => u.owner === opponentOf(p));
     const pts = sampleShotTrajectory(
       origin,
@@ -792,7 +810,12 @@ export class BattleScene extends Phaser.Scene {
   private fireStandard() {
     const s = getFowState();
     const aim = { angleRad: this.angleRad, power: this.power };
-    const origin = launchOriginForPlayer(s.activePlayer, s.gridW, s.gridH);
+    const origin = launchOriginForPlayer(
+      s.activePlayer,
+      s.units,
+      s.gridW,
+      s.gridH,
+    );
     const opponentUnits = s.units.filter(
       (u) => u.owner === opponentOf(s.activePlayer),
     );

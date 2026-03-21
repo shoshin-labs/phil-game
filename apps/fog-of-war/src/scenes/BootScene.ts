@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { ensureUnitTextures } from "../visuals/unitSprites";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +24,8 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture("fow_grain", 64, 64);
       g.destroy();
     }
+
+    ensureUnitTextures(this);
 
     this.cameras.main.fadeOut(0, 0, 0, 0);
     this.time.delayedCall(200, () => {

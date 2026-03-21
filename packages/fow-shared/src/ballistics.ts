@@ -5,7 +5,14 @@ import {
   TRAJECTORY_DT,
   TRAJECTORY_MAX_STEPS,
 } from "./constants";
-import type { AimInput, CellCoord, TrajectoryHit, Unit, Vec2 } from "./types";
+import type {
+  AimInput,
+  CellCoord,
+  PlayerId,
+  TrajectoryHit,
+  Unit,
+  Vec2,
+} from "./types";
 import { inBounds } from "./grid";
 
 export function worldToCell(p: Vec2): CellCoord {
@@ -168,14 +175,43 @@ function runTrajectory(
   return { hit, samples };
 }
 
-/** Baseline launch point: middle of back edge column for the shooter. */
+/**
+ * Shell launch position: **first surviving cannon** tile center (deterministic order),
+ * else middle of the back edge column (fallback if no cannon).
+ */
 export function launchOriginForPlayer(
-  player: "A" | "B",
+  player: PlayerId,
+  units: Unit[],
+  gridW: number,
+  gridH: number,
+): Vec2 {
+  const cannons = units
+    .filter(
+      (u) =>
+        u.owner === player &&
+        u.kind === "cannon" &&
+        u.hp > 0 &&
+        u.cells.length > 0,
+    )
+    .sort((a, b) => {
+      const ac = a.cells[0]!;
+      const bc = b.cells[0]!;
+      if (ac.row !== bc.row) return ac.row - bc.row;
+      return player === "A" ? ac.col - bc.col : bc.col - ac.col;
+    });
+  if (cannons.length > 0) {
+    return cellCenterWorld(cannons[0]!.cells[0]!);
+  }
+  return launchOriginEdgeFallback(player, gridW, gridH);
+}
+
+/** Legacy edge-only origin (tests / no cannons left). */
+export function launchOriginEdgeFallback(
+  player: PlayerId,
   gridW: number,
   gridH: number,
   rowBias = 0.5,
 ): Vec2 {
-  const s = Math.floor(gridW / 2);
   if (player === "A") {
     const col = 0;
     return {

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_GRID_H, DEFAULT_GRID_W } from "./constants";
 import {
+  cellCenterWorld,
   launchOriginForPlayer,
   sampleShotTrajectory,
   simulateShot,
 } from "./ballistics";
-import type { AimInput } from "./types";
+import type { AimInput, Unit } from "./types";
 
 describe("ballistics", () => {
   const blocked = Array.from({ length: DEFAULT_GRID_H }, () =>
@@ -13,7 +14,7 @@ describe("ballistics", () => {
   );
 
   it("finds an impact in opponent half for a forward shot from A", () => {
-    const origin = launchOriginForPlayer("A", DEFAULT_GRID_W, DEFAULT_GRID_H);
+    const origin = launchOriginForPlayer("A", [], DEFAULT_GRID_W, DEFAULT_GRID_H);
     const aim: AimInput = { angleRad: -0.45, power: 0.85 };
     const hit = simulateShot(
       origin,
@@ -30,7 +31,7 @@ describe("ballistics", () => {
   });
 
   it("sampleShotTrajectory returns a polyline for preview", () => {
-    const origin = launchOriginForPlayer("A", DEFAULT_GRID_W, DEFAULT_GRID_H);
+    const origin = launchOriginForPlayer("A", [], DEFAULT_GRID_W, DEFAULT_GRID_H);
     const aim: AimInput = { angleRad: -0.45, power: 0.85 };
     const pts = sampleShotTrajectory(
       origin,
@@ -42,5 +43,22 @@ describe("ballistics", () => {
       4,
     );
     expect(pts.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("launch origin uses first surviving cannon cell center", () => {
+    const units: Unit[] = [
+      {
+        id: "c1",
+        owner: "A",
+        kind: "cannon",
+        cells: [{ row: 4, col: 2 }],
+        hp: 2,
+        maxHp: 2,
+      },
+    ];
+    const o = launchOriginForPlayer("A", units, DEFAULT_GRID_W, DEFAULT_GRID_H);
+    const want = cellCenterWorld({ row: 4, col: 2 });
+    expect(o.x).toBeCloseTo(want.x);
+    expect(o.y).toBeCloseTo(want.y);
   });
 });

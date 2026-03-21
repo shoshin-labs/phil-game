@@ -14,6 +14,7 @@ import { FONT_UI, FONT_MONO } from "../config/fonts";
 import { GRID_OFFSET_X, GRID_OFFSET_Y, GRID_PX_W } from "../config/layout";
 import { getFowState, setFowState } from "../game/session";
 import { addArenaParallax } from "../visuals/arenaParallax";
+import { ensureUnitTextures, textureKeyForUnitKind } from "../visuals/unitSprites";
 import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
@@ -39,6 +40,7 @@ export class PlacementScene extends Phaser.Scene {
   private footprintGraphics?: Phaser.GameObjects.Graphics;
   private terrainStripesGfx?: Phaser.GameObjects.Graphics;
   private unitLabels: Phaser.GameObjects.Text[] = [];
+  private unitIcons: Phaser.GameObjects.GameObject[] = [];
   private kindButtons: Phaser.GameObjects.Text[] = [];
   private keyBindings: Phaser.Input.Keyboard.Key[] = [];
 
@@ -52,6 +54,8 @@ export class PlacementScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+
+    ensureUnitTextures(this);
 
     addArenaParallax(this);
 
@@ -316,24 +320,33 @@ export class PlacementScene extends Phaser.Scene {
   private drawUnits() {
     for (const t of this.unitLabels) t.destroy();
     this.unitLabels = [];
+    for (const im of this.unitIcons) im.destroy();
+    this.unitIcons = [];
     const s = getFowState();
 
     for (const u of s.units) {
       if (u.owner !== this.forPlayer) continue;
       u.cells.forEach((c, idx) => {
+        const cx = GRID_OFFSET_X + c.col * CELL_PX + CELL_PX / 2;
+        const cy = GRID_OFFSET_Y + c.row * CELL_PX + 11;
+        const icon = this.add.image(cx, cy, textureKeyForUnitKind(u.kind));
+        icon.setDisplaySize(22, 22);
+        icon.setDepth(4);
+        this.unitIcons.push(icon);
+
         const x = GRID_OFFSET_X + c.col * CELL_PX + 2;
-        const y = GRID_OFFSET_Y + c.row * CELL_PX + 2;
+        const y = GRID_OFFSET_Y + c.row * CELL_PX + 20;
         const label = this.add
           .text(x, y, unitCellCaption(u, idx), {
             fontFamily: FONT_UI,
-            fontSize: "9px",
+            fontSize: "8px",
             color: "#e8ecf4",
             lineSpacing: 1,
             align: "left",
             wordWrap: { width: CELL_PX - 4 },
           })
           .setOrigin(0, 0)
-          .setDepth(4);
+          .setDepth(5);
         this.unitLabels.push(label);
       });
     }

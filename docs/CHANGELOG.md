@@ -4,6 +4,10 @@ All notable changes to this monorepo are summarized here. Fog of War and The Atr
 
 ## Fog of War
 
+### 0.6.0 — 2026-03-21
+
+**Units:** Generated **icons** for cannon / bunker / decoy on the grid; HP as a short line under the icon. **Ballistics:** Shells now launch from the **first surviving cannon tile** (deterministic order), with **edge fallback** only if no cannon remains; HUD line shows source tile. **Copy:** How-to-play explains default roster (decoys off), only **standard shells + sonar** as weapons, and that shells fire **from cannons** not “nowhere”.
+
 ### 0.5.1 — 2026-03-21
 
 **UX pass:** Orange **impact preview** + blast ring on the grid (first tile struck); **HUD** shows row/col and hit type; **left** panel lists keys with **Standard vs Sonar** copy; **menu** + **battle** subtitle set **2D / not 3D** expectations; **canvas** `tabindex` + focus on pointer **down**; first-run **battle** overlay and **How to play** copy updated. See [`FOW-UX.md`](FOW-UX.md).

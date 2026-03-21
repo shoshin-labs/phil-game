@@ -86,7 +86,7 @@ export function fireStandardShot(
   const opponent = opponentOf(p);
   const opponentUnits = state.units.filter((u) => u.owner === opponent);
 
-  const origin = launchOriginForPlayer(p, state.gridW, state.gridH);
+  const origin = launchOriginForPlayer(p, state.units, state.gridW, state.gridH);
   const hit = simulateShot(
     origin,
     aim,

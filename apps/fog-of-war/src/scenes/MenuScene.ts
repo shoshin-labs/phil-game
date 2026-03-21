@@ -82,7 +82,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.5.1 — UX: impact preview, keys, 2D expectations", {
+      .text(width / 2, height - 28, "Release 0.6.0 — unit icons · shells from cannons", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",
