@@ -4,6 +4,10 @@ All notable changes to this monorepo are summarized here. Fog of War and The Atr
 
 ## Fog of War
 
+### 0.5.1 — 2026-03-21
+
+**UX pass:** Orange **impact preview** + blast ring on the grid (first tile struck); **HUD** shows row/col and hit type; **left** panel lists keys with **Standard vs Sonar** copy; **menu** + **battle** subtitle set **2D / not 3D** expectations; **canvas** `tabindex` + focus on pointer **down**; first-run **battle** overlay and **How to play** copy updated. See [`FOW-UX.md`](FOW-UX.md).
+
 ### 0.5.0 — 2026-03-21
 
 **2.5D “next pass” (Phaser grid client):** **Animated comet** — bright head loops along the aim arc (`pointOnPolyline` + `update`). **Hit-kind crater palettes** — scorch fill/stroke/ring colours follow `TrajectoryHit.kind` (unit / terrain / miss / out-of-bounds); session stores `{ count, lastKind }` per cell. **Rubble shards** — deterministic triangles around each crater, denser on repeat hits. Cleared with `resetFowSession()` like other client-only battle marks.

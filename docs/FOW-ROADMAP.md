@@ -1,8 +1,12 @@
 # Fog of War — roadmap
 
-## 0.5.0 (current)
+## 0.5.1 (current)
 
-- **2.5D track (Phaser + grid rules)** — in a good place: parallax, grain, row tint, ground stripes, impact + sonar FX, **rich tracer**, **comet head** on the arc, **hit-kind crater palettes**, **rubble shards**, repeat-hit emphasis, handoff delay for VFX.
+- **UX** — grid **impact preview** (orange first-hit + blast ring), **HUD** row/col + hit label, **left key legend**, **2D vs not-3D** copy, **canvas focus**, updated **How to play** + first-run overlay. See [`FOW-UX.md`](FOW-UX.md).
+
+## 0.5.0
+
+- **2.5D track (Phaser + grid rules)** — parallax, grain, row tint, ground stripes, impact + sonar FX, **rich tracer**, **comet head** on the arc, **hit-kind crater palettes**, **rubble shards**, repeat-hit emphasis, handoff delay for VFX.
 
 ## 0.4.0
 

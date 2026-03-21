@@ -30,9 +30,17 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
+      .text(width / 2, height / 3 + 78, "2D grid + ballistics — not a 3D shooter.", {
+        fontFamily: FONT_UI,
+        fontSize: "14px",
+        color: "#5a6070",
+      })
+      .setOrigin(0.5);
+
+    this.add
       .text(
         width / 2,
-        height / 3 + 88,
+        height / 3 + 108,
         "Two players · one keyboard · pass the device when asked",
         {
           fontFamily: FONT_UI,
@@ -74,7 +82,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.5.0 — comet tracer · kind-aware craters · rubble", {
+      .text(width / 2, height - 28, "Release 0.5.1 — UX: impact preview, keys, 2D expectations", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",

@@ -1,6 +1,6 @@
 # Fog of War — build & run
 
-**Release:** **0.5.0** (`@phil-game/fog-of-war` / `@phil-game/fow-shared`). Optional **3D** client or further juice: [`FOW-ROADMAP.md`](FOW-ROADMAP.md).
+**Release:** **0.5.1** (`@phil-game/fog-of-war` / `@phil-game/fow-shared`). UX notes: [`FOW-UX.md`](FOW-UX.md). Optional **3D** client: [`FOW-ROADMAP.md`](FOW-ROADMAP.md).
 
 ## Packages
 

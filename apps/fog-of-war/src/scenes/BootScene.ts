@@ -6,6 +6,12 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    const canvas = this.game.canvas;
+    canvas.setAttribute("tabindex", "0");
+    if (canvas instanceof HTMLElement) {
+      canvas.style.outline = "none";
+    }
+
     if (!this.textures.exists("fow_grain")) {
       const g = this.make.graphics({ x: 0, y: 0 }, false);
       g.fillStyle(0x8899aa);

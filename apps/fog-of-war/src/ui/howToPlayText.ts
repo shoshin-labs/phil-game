@@ -4,7 +4,7 @@ export const HOW_TO_PLAY_BODY = [
   "",
   "Setup — each player places on their half. You must place exactly 2 cannons (one tile each) and 1 bunker (two tiles in a line). You cannot place more than the roster allows. Rotate the bunker with R or the toggle before placing.",
   "",
-  "Battle — Standard: the blue arc shows where the shell will fly. A/D = aim angle, W/S = power, Space = fire. Sonar: switch mode, move over the enemy half, then click; green tiles show the ping area.",
+  "Battle — This is a 2D grid (not 3D). Standard: the blue arc is the flight path; the orange outline shows the first cell the shell will strike, and a lighter ring shows blast radius. A/D = aim angle, W/S = power, Space = fire. Click the game once if keys do not respond (browser focus). Sonar: switch mode, move over the enemy half, then click; green tiles show the ping area.",
   "",
   "Hot-seat — one keyboard; pass the device when the handoff screen appears.",
 ].join("\n");

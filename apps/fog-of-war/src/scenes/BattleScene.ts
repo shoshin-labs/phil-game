@@ -3,6 +3,7 @@ import {
   CELL_PX,
   DEFAULT_AMMO_SONAR,
   DEFAULT_AMMO_STANDARD,
+  DEFAULT_BLAST_RADIUS_CELLS,
   DEFAULT_SONAR_RADIUS_CELLS,
   cellKey,
   cellCenterWorld,
@@ -50,17 +51,19 @@ import {
 } from "../visuals/trajectoryPreview";
 import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
+import { labelHitKind } from "../ui/battleHints";
 import { openHelpOverlay } from "../ui/helpOverlay";
 import { unitCellCaption } from "../ui/unitLabels";
 
 type FireMode = "standard" | "sonar";
 
 const GRID_TOP = GRID_OFFSET_Y;
-const HINT_KEY = "fow_battle_hint_v1";
+const HINT_KEY = "fow_battle_hint_v2";
 
 export class BattleScene extends Phaser.Scene {
   private cellGraphics?: Phaser.GameObjects.Graphics;
   private previewGraphics?: Phaser.GameObjects.Graphics;
+  private impactPreviewGraphics?: Phaser.GameObjects.Graphics;
   private hoverGraphics?: Phaser.GameObjects.Graphics;
   private unitLabels: Phaser.GameObjects.Text[] = [];
   private hud?: Phaser.GameObjects.Text;
@@ -108,6 +111,19 @@ export class BattleScene extends Phaser.Scene {
         fontSize: "26px",
         color: "#e8ecf4",
       })
+      .setOrigin(0.5);
+
+    this.add
+      .text(
+        this.gridCenterX,
+        58,
+        "2D grid · Orange cell = first tile the shell hits · Not 3D",
+        {
+          fontFamily: FONT_UI,
+          fontSize: "13px",
+          color: "#6a7898",
+        },
+      )
       .setOrigin(0.5);
 
     this.hud = this.add
@@ -234,6 +250,9 @@ export class BattleScene extends Phaser.Scene {
     };
 
     const onPointerDown = (p: Phaser.Input.Pointer) => {
+      const canvas = this.game.canvas;
+      if (canvas instanceof HTMLElement) canvas.focus();
+
       if (p.y < GRID_TOP) return;
       const s = getFowState();
       const wx = p.worldX - GRID_OFFSET_X;
@@ -259,6 +278,7 @@ export class BattleScene extends Phaser.Scene {
       this.hudErrorTimer?.remove();
       this.transitionTimer?.remove();
       this.destroyCometHead();
+      this.impactPreviewGraphics?.destroy();
     });
 
     this.refreshHud();
@@ -391,18 +411,34 @@ export class BattleScene extends Phaser.Scene {
       .setDepth(depth);
     this.ammoHud.push(sonarCount);
 
+    const legendText =
+      this.mode === "standard"
+        ? [
+            "── Standard mode ──",
+            "A / D   Aim angle",
+            "W / S   Shot power",
+            "Space   Fire",
+            "",
+            "Orange = first tile hit.",
+            "Click board if keys idle.",
+          ].join("\n")
+        : [
+            "── Sonar mode ──",
+            "Hover enemy half,",
+            "click to ping.",
+            "",
+            "Green outline =",
+            "cells revealed.",
+          ].join("\n");
+
     const legend = this.add
-      .text(
-        x0,
-        108,
-        "Click the game\nto use keys",
-        {
-          fontFamily: FONT_UI,
-          fontSize: "12px",
-          color: "#5a6070",
-          lineSpacing: 4,
-        },
-      )
+      .text(x0, 104, legendText, {
+        fontFamily: FONT_UI,
+        fontSize: "13px",
+        color: "#8a94a8",
+        lineSpacing: 5,
+        wordWrap: { width: 300 },
+      })
       .setDepth(depth);
     this.ammoHud.push(legend);
   }
@@ -421,7 +457,7 @@ export class BattleScene extends Phaser.Scene {
     overlay.setDepth(1000);
 
     const title = this.add
-      .text(width / 2, height / 2 - 140, "Before you shoot", {
+      .text(width / 2, height / 2 - 160, "Battle — quick guide", {
         fontFamily: FONT_UI,
         fontSize: "22px",
         color: "#e8ecf4",
@@ -432,20 +468,23 @@ export class BattleScene extends Phaser.Scene {
     const body = this.add
       .text(
         width / 2,
-        height / 2 - 20,
+        height / 2 - 36,
         [
-          "Your units and ammo are on the left.",
-          "Aim and mode help are on the right.",
+          "This is a 2D grid game (not 3D). You do not pick a square directly —",
+          "you aim with physics: angle + power, then Space to fire.",
           "",
-          "Standard — blue arc = shell path. A/D · W/S · Space",
-          "Sonar — green tiles = reveal area. Click enemy side.",
+          "Watch the orange outline: that is the first tile your shell will hit.",
+          "The lighter ring is blast radius. The blue arc is the flight path.",
+          "",
+          "Keys: A/D angle · W/S power · Space fire. Click the board if keys do nothing.",
+          "Sonar: switch mode, then click the enemy side — green shows the ping area.",
         ].join("\n"),
         {
           fontFamily: FONT_UI,
-          fontSize: "16px",
+          fontSize: "15px",
           color: "#b8c0d0",
           align: "center",
-          wordWrap: { width: width - 120 },
+          wordWrap: { width: width - 100 },
         },
       )
       .setOrigin(0.5)
@@ -497,11 +536,27 @@ export class BattleScene extends Phaser.Scene {
     const last = getLastSonarLine(p);
     const aimHelp =
       this.mode === "standard"
-        ? "Standard — A/D angle · W/S power · Space fire"
+        ? "Keys: A/D = angle · W/S = power · Space = fire shell"
         : "Sonar — click a tile on the enemy half";
 
     const parts: string[] = [`Player ${p}`];
     if (last) parts.push(last, "");
+
+    if (this.mode === "standard") {
+      const pred = this.computeAimPrediction();
+      if (pred) {
+        if (pred.cell && inBounds(pred.cell, s.gridW, s.gridH)) {
+          parts.push(
+            `Shell lands → row ${pred.cell.row}, col ${pred.cell.col}`,
+            `${labelHitKind(pred.kind)} · blast covers radius ${DEFAULT_BLAST_RADIUS_CELLS}`,
+          );
+        } else {
+          parts.push(`Path result: ${labelHitKind(pred.kind)}`);
+        }
+        parts.push("");
+      }
+    }
+
     parts.push(
       aimHelp,
       "",
@@ -518,6 +573,62 @@ export class BattleScene extends Phaser.Scene {
       this.hudErrorTimer = undefined;
       this.refreshHud();
     });
+  }
+
+  private computeAimPrediction() {
+    const s = getFowState();
+    if (s.phase !== "battle") return null;
+    const p = s.activePlayer;
+    const origin = launchOriginForPlayer(p, s.gridW, s.gridH);
+    const opponentUnits = s.units.filter((u) => u.owner === opponentOf(p));
+    return simulateShot(
+      origin,
+      { angleRad: this.angleRad, power: this.power },
+      s.gridW,
+      s.gridH,
+      s.blocked,
+      opponentUnits,
+    );
+  }
+
+  private drawImpactCellPreview() {
+    this.impactPreviewGraphics?.destroy();
+    if (this.mode !== "standard") return;
+
+    const hit = this.computeAimPrediction();
+    if (!hit) return;
+
+    const s = getFowState();
+    const g = this.add.graphics();
+    this.impactPreviewGraphics = g;
+    g.setDepth(9);
+
+    if (hit.cell && inBounds(hit.cell, s.gridW, s.gridH)) {
+      const blast = cellsInManhattanRadius(
+        hit.cell,
+        DEFAULT_BLAST_RADIUS_CELLS,
+        s.gridW,
+        s.gridH,
+      );
+      g.lineStyle(1, 0xffaa44, 0.4);
+      for (const c of blast) {
+        const x = GRID_OFFSET_X + c.col * CELL_PX;
+        const y = GRID_OFFSET_Y + c.row * CELL_PX;
+        g.strokeRect(x + 0.5, y + 0.5, CELL_PX - 2, CELL_PX - 2);
+      }
+      const x = GRID_OFFSET_X + hit.cell.col * CELL_PX;
+      const y = GRID_OFFSET_Y + hit.cell.row * CELL_PX;
+      g.lineStyle(3, 0xffdd88, 0.98);
+      g.strokeRect(x + 1, y + 1, CELL_PX - 4, CELL_PX - 4);
+    } else {
+      const ix = GRID_OFFSET_X + hit.impactWorld.x;
+      const iy = GRID_OFFSET_Y + hit.impactWorld.y;
+      g.lineStyle(2, 0xff6666, 0.9);
+      g.lineBetween(ix - 7, iy - 7, ix + 7, iy + 7);
+      g.lineBetween(ix - 7, iy + 7, ix + 7, iy - 7);
+      g.lineStyle(1, 0xff8888, 0.55);
+      g.strokeCircle(ix, iy, 12);
+    }
   }
 
   private opponentUnitVisible(fog: FogMap, u: Unit): boolean {
@@ -620,6 +731,7 @@ export class BattleScene extends Phaser.Scene {
 
   private drawTrajectoryPreview() {
     this.previewGraphics?.destroy();
+    this.impactPreviewGraphics?.destroy();
     this.destroyCometHead();
     this.trajectoryPtsWorld = [];
     if (this.mode !== "standard") return;
@@ -647,6 +759,7 @@ export class BattleScene extends Phaser.Scene {
     );
     this.setupCometHead();
     this.cometProgress = 0;
+    this.drawImpactCellPreview();
   }
 
   private drawHover() {
