@@ -74,7 +74,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.2.0 · 2.5D depth pass — parallax & terrain tint", {
+      .text(width / 2, height - 28, "Release 0.3.0 — aim parallax · impacts · sonar ripples · ground stripes", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",

@@ -5,6 +5,7 @@ import {
   DEFAULT_AMMO_STANDARD,
   DEFAULT_SONAR_RADIUS_CELLS,
   cellKey,
+  cellCenterWorld,
   cellsInManhattanRadius,
   fireSonar,
   fireStandardShot,
@@ -13,6 +14,7 @@ import {
   opponentOf,
   playerOwnsColumn,
   sampleShotTrajectory,
+  simulateShot,
   type FogMap,
   type GameState,
   type Unit,
@@ -30,7 +32,14 @@ import {
   setFowState,
   setLastSonarLine,
 } from "../game/session";
-import { addArenaParallax } from "../visuals/arenaParallax";
+import {
+  addArenaParallax,
+  resetAimParallax,
+  updateAimParallax,
+  type ArenaParallaxHandles,
+} from "../visuals/arenaParallax";
+import { spawnShellImpactFromHit, spawnSonarRipple } from "../visuals/combatFx";
+import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
 import { unitCellCaption } from "../ui/unitLabels";
@@ -56,6 +65,9 @@ export class BattleScene extends Phaser.Scene {
   private keyBindings: Phaser.Input.Keyboard.Key[] = [];
   private gridCenterX = 0;
   private hudErrorTimer?: Phaser.Time.TimerEvent;
+  private parallaxHandles?: ArenaParallaxHandles;
+  private terrainStripesGfx?: Phaser.GameObjects.Graphics;
+  private transitionTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super("Battle");
@@ -65,7 +77,7 @@ export class BattleScene extends Phaser.Scene {
     const { width } = this.scale;
     this.gridCenterX = GRID_OFFSET_X + GRID_PX_W / 2;
 
-    addArenaParallax(this);
+    this.parallaxHandles = addArenaParallax(this);
 
     const gridRight = GRID_OFFSET_X + GRID_PX_W;
     this.add
@@ -135,6 +147,7 @@ export class BattleScene extends Phaser.Scene {
     std.on("pointerdown", () => {
       this.mode = "standard";
       this.syncModeButtons();
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
       this.drawHover();
@@ -142,6 +155,7 @@ export class BattleScene extends Phaser.Scene {
     sn.on("pointerdown", () => {
       this.mode = "sonar";
       this.syncModeButtons();
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
       this.drawHover();
@@ -157,21 +171,25 @@ export class BattleScene extends Phaser.Scene {
     };
     bindKey(K.A, () => {
       this.angleRad -= 0.05;
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
     });
     bindKey(K.D, () => {
       this.angleRad += 0.05;
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
     });
     bindKey(K.W, () => {
       this.power = Math.min(1, this.power + 0.05);
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
     });
     bindKey(K.S, () => {
       this.power = Math.max(0.05, this.power - 0.05);
+      this.syncAimParallax();
       this.refreshHud();
       this.drawTrajectoryPreview();
     });
@@ -224,11 +242,23 @@ export class BattleScene extends Phaser.Scene {
       for (const k of this.keyBindings) k.destroy();
       this.keyBindings = [];
       this.hudErrorTimer?.remove();
+      this.transitionTimer?.remove();
     });
 
     this.refreshHud();
+    this.syncAimParallax();
     this.redrawBattlefield();
     this.maybeShowBattleHint();
+  }
+
+  private syncAimParallax() {
+    const h = this.parallaxHandles;
+    if (!h) return;
+    if (this.mode === "standard") {
+      updateAimParallax(h, this.angleRad, this.power);
+    } else {
+      resetAimParallax(h);
+    }
   }
 
   private clearAmmoHud() {
@@ -455,6 +485,9 @@ export class BattleScene extends Phaser.Scene {
     const viewer = s.activePlayer;
     const fog: FogMap = viewer === "A" ? s.fogA : s.fogB;
 
+    this.terrainStripesGfx?.destroy();
+    this.terrainStripesGfx = drawTerrainStripes(this, s.gridW, s.gridH);
+
     this.cellGraphics?.destroy();
     const g = this.add.graphics();
     this.cellGraphics = g;
@@ -581,17 +614,31 @@ export class BattleScene extends Phaser.Scene {
 
   private fireStandard() {
     const s = getFowState();
-    const r = fireStandardShot(s, {
-      angleRad: this.angleRad,
-      power: this.power,
-    });
+    const aim = { angleRad: this.angleRad, power: this.power };
+    const origin = launchOriginForPlayer(s.activePlayer, s.gridW, s.gridH);
+    const opponentUnits = s.units.filter(
+      (u) => u.owner === opponentOf(s.activePlayer),
+    );
+    const hit = simulateShot(
+      origin,
+      aim,
+      s.gridW,
+      s.gridH,
+      s.blocked,
+      opponentUnits,
+    );
+
+    const r = fireStandardShot(s, aim);
     if ("error" in r) {
       this.showHudError(r.error);
       return;
     }
+
+    this.applyFireState(r.state);
     playShoot(this);
     this.cameras.main.shake(110, 0.0028);
-    this.afterFire(r.state);
+    spawnShellImpactFromHit(this, hit, GRID_OFFSET_X, GRID_OFFSET_Y);
+    this.scheduleBattleTransition(r.state);
   }
 
   private fireSonarAt(cell: { row: number; col: number }) {
@@ -614,26 +661,41 @@ export class BattleScene extends Phaser.Scene {
       p,
       `Last ping: +${delta} cells (centre row ${cell.row}, col ${cell.col})`,
     );
+
+    const wc = cellCenterWorld(cell);
+    spawnSonarRipple(
+      this,
+      GRID_OFFSET_X + wc.x,
+      GRID_OFFSET_Y + wc.y,
+    );
+
+    this.applyFireState(r.state);
     playSonar(this);
-    this.afterFire(r.state);
+    this.scheduleBattleTransition(r.state);
   }
 
-  private afterFire(next: GameState) {
+  private applyFireState(next: GameState) {
     setFowState(next);
     this.refreshHud();
     this.redrawBattlefield();
+  }
 
-    if (next.phase === "ended") {
-      playGameEnd(this);
-      this.scene.start("Result");
-      return;
-    }
+  private scheduleBattleTransition(next: GameState) {
+    this.transitionTimer?.remove();
+    this.transitionTimer = this.time.delayedCall(440, () => {
+      this.transitionTimer = undefined;
+      if (next.phase === "ended") {
+        playGameEnd(this);
+        this.scene.start("Result");
+        return;
+      }
 
-    const passTo = next.activePlayer;
-    this.scene.start("Handoff", {
-      title: `Pass device to Player ${passTo}`,
-      subtitle: "Give them privacy — don't peek at their map.",
-      nextScene: "Battle",
+      const passTo = next.activePlayer;
+      this.scene.start("Handoff", {
+        title: `Pass device to Player ${passTo}`,
+        subtitle: "Give them privacy — don't peek at their map.",
+        nextScene: "Battle",
+      });
     });
   }
 }

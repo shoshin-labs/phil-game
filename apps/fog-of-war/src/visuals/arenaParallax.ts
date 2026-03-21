@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 import type { Scene } from "phaser";
 import {
   GRID_OFFSET_X,
@@ -10,11 +11,20 @@ const SKY_DEPTH = -40;
 const HILL_DEPTH = -38;
 const ARENA_PAD_DEPTH = -36;
 
+/** Margin so subtle aim parallax does not reveal empty edges. */
+const SKY_BLEED = 120;
+
+export interface ArenaParallaxHandles {
+  sky: Phaser.GameObjects.Graphics;
+  hills: Phaser.GameObjects.Graphics;
+  slab: Phaser.GameObjects.Graphics;
+}
+
 /**
  * Full-screen sky gradient + distant hills + soft arena slab behind the grid.
  * Keeps side HUD columns readable; sits under scene chrome (negative depth).
  */
-export function addArenaParallax(scene: Scene): void {
+export function addArenaParallax(scene: Scene): ArenaParallaxHandles {
   const { width, height } = scene.scale;
 
   const sky = scene.add.graphics();
@@ -29,7 +39,7 @@ export function addArenaParallax(scene: Scene): void {
     1,
     1,
   );
-  sky.fillRect(0, 0, width, height);
+  sky.fillRect(-SKY_BLEED, -SKY_BLEED, width + SKY_BLEED * 2, height + SKY_BLEED * 2);
 
   const hills = scene.add.graphics();
   hills.setDepth(HILL_DEPTH);
@@ -66,6 +76,32 @@ export function addArenaParallax(scene: Scene): void {
   slab.fillRect(sx, sy, sw, sh);
   slab.lineStyle(1, 0x2a3848, 0.45);
   slab.strokeRect(sx + 0.5, sy + 0.5, sw - 1, sh - 1);
+
+  return { sky, hills, slab };
+}
+
+/** Aim-driven micro-shift: hills move more than sky (classic parallax). */
+export function updateAimParallax(
+  h: ArenaParallaxHandles,
+  angleRad: number,
+  power: number,
+): void {
+  const angleRef = 0.45;
+  const powerRef = 0.55;
+  const ax = angleRad - angleRef;
+  const py = power - powerRef;
+  const ox = Phaser.Math.Clamp(ax * 26, -18, 18);
+  const oy = Phaser.Math.Clamp(py * -12, -9, 9);
+
+  h.sky.setPosition(ox * 0.22, oy * 0.18);
+  h.hills.setPosition(ox * 0.72, oy * 0.45);
+  h.slab.setPosition(ox * 0.12, oy * 0.08);
+}
+
+export function resetAimParallax(h: ArenaParallaxHandles): void {
+  h.sky.setPosition(0, 0);
+  h.hills.setPosition(0, 0);
+  h.slab.setPosition(0, 0);
 }
 
 /** Menu / title: lighter horizon band without the arena slab. */

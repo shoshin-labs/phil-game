@@ -14,6 +14,7 @@ import { FONT_UI, FONT_MONO } from "../config/fonts";
 import { GRID_OFFSET_X, GRID_OFFSET_Y, GRID_PX_W } from "../config/layout";
 import { getFowState, setFowState } from "../game/session";
 import { addArenaParallax } from "../visuals/arenaParallax";
+import { drawTerrainStripes } from "../visuals/terrainStripes";
 import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
 import { unitCellCaption } from "../ui/unitLabels";
@@ -36,6 +37,7 @@ export class PlacementScene extends Phaser.Scene {
   private statusLabel?: Phaser.GameObjects.Text;
   private cellGraphics?: Phaser.GameObjects.Graphics;
   private footprintGraphics?: Phaser.GameObjects.Graphics;
+  private terrainStripesGfx?: Phaser.GameObjects.Graphics;
   private unitLabels: Phaser.GameObjects.Text[] = [];
   private kindButtons: Phaser.GameObjects.Text[] = [];
   private keyBindings: Phaser.Input.Keyboard.Key[] = [];
@@ -270,12 +272,15 @@ export class PlacementScene extends Phaser.Scene {
   }
 
   private drawGrid() {
+    const s = getFowState();
+    this.terrainStripesGfx?.destroy();
+    this.terrainStripesGfx = drawTerrainStripes(this, s.gridW, s.gridH);
+
     this.cellGraphics?.destroy();
     this.footprintGraphics?.destroy();
     const g = this.add.graphics();
     this.cellGraphics = g;
     g.setDepth(0);
-    const s = getFowState();
     const split = Math.floor(s.gridW / 2);
 
     for (let row = 0; row < s.gridH; row++) {
