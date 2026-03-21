@@ -32,7 +32,7 @@
 
 ## Next (optional)
 
-1. **Juice / content** — sound variety, tutorial copy, balance passes; still the same stack.
-2. **Real 3D client** — new renderer (e.g. Three.js / Babylon / Godot) driven by the **same** `@phil-game/fow-shared` simulation; lock camera model and what stays rule-based vs rendered.
+1. **Juice / content** — sound variety, tutorial copy, balance passes; still the Phaser stack.
+2. **Hybrid 3D client (planned)** — **Top-down = ground truth**; **side / low cam** for aim & impact spectacle; `fow-shared` remains authoritative. See **[`FOW-3D-HYBRID-PLAN.md`](FOW-3D-HYBRID-PLAN.md)** for phases, architecture, and open decisions.
 
 See also [`CHANGELOG.md`](CHANGELOG.md).
