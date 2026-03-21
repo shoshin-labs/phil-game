@@ -384,12 +384,13 @@ These are **decisions for implementation**, not open questions.
 - **Decision:** **v1 — none.**  
 - **v2:** WebSocket + authoritative server outline TBD.
 
-### 13.1 Repo layout (target)
+### 13.1 Repo layout (in repo)
 
 | Concern | Location |
 |---------|----------|
-| Rules, types, ballistics, fog reducer | `packages/fow-shared` *(create when starting implementation)* |
-| Phaser app | `apps/fog-of-war` *(create when starting)* |
+| Rules, types, ballistics, fog, shot resolution (pure TS, no Phaser) | `packages/fow-shared` |
+| Phaser client (scenes TBD: placement, battle, handoff) | `apps/fog-of-war` |
+| Build / dev notes | [`docs/FOW-BUILD.md`](FOW-BUILD.md) |
 | This GDD | `docs/FOW-GDD.md` |
 | Server | `apps/fow-server` — **v2+** |
 

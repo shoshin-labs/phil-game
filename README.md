@@ -3,12 +3,12 @@
 Monorepo for games by **Shoshin Labs**. Currently houses two projects:
 
 - **The Atrium** — a short philosophy game about *how you move through ideas* (branching choices, hidden axes, reflective finale). Design: [`docs/GDD.md`](docs/GDD.md).
-- **Fog of War** *(in design)* — a turn-based, physics-driven strategy game blending Battleships-style deduction with Angry Birds-style destruction. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md).
+- **Fog of War** *(in development)* — turn-based, physics-driven strategy with hidden information. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md). Build notes: [`docs/FOW-BUILD.md`](docs/FOW-BUILD.md).
 
 ## Games
 
 - **`apps/philosophy`** — **The Atrium** — Phaser 3 philosophy game; narrative data in `@phil-game/shared`. Design: [`docs/GDD.md`](docs/GDD.md).
-- **`apps/fog-of-war`** *(planned)* — **Fog of War** — Turn-based physics strategy with hidden-information gameplay. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md).
+- **`apps/fog-of-war`** — **Fog of War** — Phaser client; rules in `@phil-game/fow-shared`. `pnpm dev:fow` to run.
 
 ## Setup
 
@@ -24,11 +24,17 @@ From the repo root:
 pnpm dev
 ```
 
-Or:
+**Fog of War:**
 
 ```bash
-cd apps/philosophy
-pnpm dev
+pnpm dev:fow
+```
+
+Or from an app folder:
+
+```bash
+cd apps/philosophy && pnpm dev
+cd apps/fog-of-war && pnpm dev
 ```
 
 Then open the URL Vite prints (usually `http://localhost:5173`).
