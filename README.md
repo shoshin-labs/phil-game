@@ -1,10 +1,14 @@
 # phil-game
 
-Monorepo for **The Atrium** — a short philosophy game about *how you move through ideas* (branching choices, hidden axes, reflective finale). Design lives in [`docs/GDD.md`](docs/GDD.md).
+Monorepo for games by **Shoshin Labs**. Currently houses two projects:
+
+- **The Atrium** — a short philosophy game about *how you move through ideas* (branching choices, hidden axes, reflective finale). Design: [`docs/GDD.md`](docs/GDD.md).
+- **Fog of War** *(in design)* — a turn-based, physics-driven strategy game blending Battleships-style deduction with Angry Birds-style destruction. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md).
 
 ## Games
 
-- **`apps/philosophy`** — Phaser 3 player; narrative data in `@phil-game/shared`.
+- **`apps/philosophy`** — **The Atrium** — Phaser 3 philosophy game; narrative data in `@phil-game/shared`. Design: [`docs/GDD.md`](docs/GDD.md).
+- **`apps/fog-of-war`** *(planned)* — **Fog of War** — Turn-based physics strategy with hidden-information gameplay. Design: [`docs/FOW-GDD.md`](docs/FOW-GDD.md).
 
 ## Setup
 
