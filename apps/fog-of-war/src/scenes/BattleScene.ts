@@ -30,6 +30,8 @@ import {
   setFowState,
   setLastSonarLine,
 } from "../game/session";
+import { addArenaParallax } from "../visuals/arenaParallax";
+import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
 import { unitCellCaption } from "../ui/unitLabels";
 
@@ -62,6 +64,8 @@ export class BattleScene extends Phaser.Scene {
   create() {
     const { width } = this.scale;
     this.gridCenterX = GRID_OFFSET_X + GRID_PX_W / 2;
+
+    addArenaParallax(this);
 
     const gridRight = GRID_OFFSET_X + GRID_PX_W;
     this.add
@@ -463,16 +467,19 @@ export class BattleScene extends Phaser.Scene {
         const own = playerOwnsColumn(viewer, col, s.gridW);
 
         if (own) {
-          g.fillStyle(0x1a2330, 1);
+          g.fillStyle(cellTintByRowDepth(0x1a2330, row, s.gridH), 1);
         } else {
           const k = cellKey({ row, col });
           const fc = fog[k];
           if (fc === undefined) {
-            g.fillStyle(0x0a0c12, 0.92);
+            g.fillStyle(
+              cellTintByRowDepth(0x0a0c12, row, s.gridH),
+              0.92,
+            );
           } else if (fc.empty) {
-            g.fillStyle(0x151820, 1);
+            g.fillStyle(cellTintByRowDepth(0x151820, row, s.gridH), 1);
           } else {
-            g.fillStyle(0x1c2230, 1);
+            g.fillStyle(cellTintByRowDepth(0x1c2230, row, s.gridH), 1);
           }
         }
 
@@ -583,6 +590,7 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
     playShoot(this);
+    this.cameras.main.shake(110, 0.0028);
     this.afterFire(r.state);
   }
 

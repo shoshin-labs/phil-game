@@ -13,6 +13,8 @@ import {
 import { FONT_UI, FONT_MONO } from "../config/fonts";
 import { GRID_OFFSET_X, GRID_OFFSET_Y, GRID_PX_W } from "../config/layout";
 import { getFowState, setFowState } from "../game/session";
+import { addArenaParallax } from "../visuals/arenaParallax";
+import { cellTintByRowDepth } from "../visuals/terrainDepth";
 import { openHelpOverlay } from "../ui/helpOverlay";
 import { unitCellCaption } from "../ui/unitLabels";
 
@@ -48,6 +50,8 @@ export class PlacementScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+
+    addArenaParallax(this);
 
     const gridRight = GRID_OFFSET_X + GRID_PX_W;
     this.add
@@ -280,7 +284,8 @@ export class PlacementScene extends Phaser.Scene {
         const y = GRID_OFFSET_Y + row * CELL_PX;
         const own =
           this.forPlayer === "A" ? col < split : col >= split;
-        g.fillStyle(own ? 0x1a2330 : 0x12141c, 1);
+        const base = own ? 0x1a2330 : 0x12141c;
+        g.fillStyle(cellTintByRowDepth(base, row, s.gridH), 1);
         g.fillRect(x, y, CELL_PX - 1, CELL_PX - 1);
         g.lineStyle(1, 0x2a2a38, 1);
         g.strokeRect(x, y, CELL_PX - 1, CELL_PX - 1);

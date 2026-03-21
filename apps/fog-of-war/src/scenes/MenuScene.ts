@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { FONT_UI } from "../config/fonts";
 import { resetFowSession } from "../game/session";
+import { addTitleBackdrop } from "../visuals/arenaParallax";
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -9,6 +10,8 @@ export class MenuScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+
+    addTitleBackdrop(this);
 
     this.add
       .text(width / 2, height / 3 - 20, "Fog of War", {
@@ -71,7 +74,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height - 28, "Release 0.1.0 · 2D prototype — spatial / 3D next", {
+      .text(width / 2, height - 28, "Release 0.2.0 · 2.5D depth pass — parallax & terrain tint", {
         fontFamily: FONT_UI,
         fontSize: "12px",
         color: "#4a5568",
